@@ -1,98 +1,74 @@
 <!--
   azure-nettrace HTML report — canonical template & reference output (English, healthy trace).
-  The skill produces reports by copying this <style> and the <svg id="nt-sprite"> sprite
-  VERBATIM, then building the <body> in the requested language from the trace facts.
-  See references/output-html.md for the label dictionary, icon map, severity rules and
-  the official-icon mode. Self-contained: no external JS/CSS/fonts.
+  Interactive: clicking a node or branch shows that resource's network settings in the
+  inspector below the diagram. The skill produces reports by copying this <style>, the
+  <svg id="nt-sprite"> sprite and the <script> VERBATIM, then building the <body> and the
+  <div id="nt-details"> store in the requested language from the trace facts.
+  See references/output-html.md. Self-contained: no external JS/CSS/fonts.
 -->
 <title>Connectivity trace: contoso-app</title>
-<style>
-:root{
-  --paper:#fbfcfd; --panel:#fff; --ink:#14181f; --muted:#5a6472; --faint:#8b95a5;
-  --line:#e4e7ec; --line-strong:#ccd2db; --grid:rgba(20,32,54,.045);
-  --crit:#b42318; --warn:#b54708; --pass:#067647; --unv:#667085;
-  --code-bg:#0d1526; --code-ink:#e7ecf5;
-  --cat-web:#0f74d1; --cat-compute:#0f74d1; --cat-net:#3b5b8f; --cat-data:#0a8f83;
-  --cat-sec:#2e8b57; --cat-dns:#7a52c0; --cat-ai:#c2410c; --cat-integration:#6d3fc0;
-  --mono:ui-monospace,"Cascadia Mono","Consolas","SF Mono",monospace;
-  --sans:ui-sans-serif,system-ui,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
-}
-@media (prefers-color-scheme:dark){:root{
-  --paper:#0e131b;--panel:#141b26;--ink:#e6eaf0;--muted:#9aa4b2;--faint:#6b7688;
-  --line:#232c3a;--line-strong:#33405a;--grid:rgba(255,255,255,.035);
-  --crit:#f97066;--warn:#f5a623;--pass:#5fd08a;--unv:#8b95a7;--code-bg:#070c15;
-  --cat-web:#4aa3f0;--cat-compute:#4aa3f0;--cat-net:#7d97c8;--cat-data:#3ec6ba;
-  --cat-sec:#5fd08a;--cat-dns:#a98ce0;--cat-ai:#f97316;--cat-integration:#a98ce0;
-}}
-:root[data-theme=light]{--paper:#fbfcfd;--panel:#fff;--ink:#14181f;--muted:#5a6472;--faint:#8b95a5;--line:#e4e7ec;--line-strong:#ccd2db;--grid:rgba(20,32,54,.045);--crit:#b42318;--warn:#b54708;--pass:#067647;--unv:#667085;--code-bg:#0d1526;--cat-web:#0f74d1;--cat-net:#3b5b8f;--cat-data:#0a8f83;--cat-sec:#2e8b57;--cat-dns:#7a52c0;--cat-ai:#c2410c;--cat-integration:#6d3fc0;--cat-compute:#0f74d1;}
-:root[data-theme=dark]{--paper:#0e131b;--panel:#141b26;--ink:#e6eaf0;--muted:#9aa4b2;--faint:#6b7688;--line:#232c3a;--line-strong:#33405a;--grid:rgba(255,255,255,.035);--crit:#f97066;--warn:#f5a623;--pass:#5fd08a;--unv:#8b95a7;--code-bg:#070c15;--cat-web:#4aa3f0;--cat-net:#7d97c8;--cat-data:#3ec6ba;--cat-sec:#5fd08a;--cat-dns:#a98ce0;--cat-ai:#f97316;--cat-integration:#a98ce0;--cat-compute:#4aa3f0;}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+<style>:root{--paper:#fbfcfd;--panel:#fff;--ink:#14181f;--muted:#5a6472;--faint:#8b95a5;--line:#e4e7ec;--line-strong:#ccd2db;--grid:rgba(20,32,54,.045);--crit:#b42318;--warn:#b54708;--pass:#067647;--unv:#667085;--code-bg:#0d1526;--code-ink:#e7ecf5;--sel:#0f74d1;--mono:ui-monospace,"Cascadia Mono","Consolas","SF Mono",monospace;--sans:ui-sans-serif,system-ui,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
+@media (prefers-color-scheme:dark){:root{--paper:#0e131b;--panel:#141b26;--ink:#e6eaf0;--muted:#9aa4b2;--faint:#6b7688;--line:#232c3a;--line-strong:#33405a;--grid:rgba(255,255,255,.035);--crit:#f97066;--warn:#f5a623;--pass:#5fd08a;--unv:#8b95a7;--code-bg:#070c15;--sel:#4aa3f0}}
+:root[data-theme=light]{--paper:#fbfcfd;--panel:#fff;--ink:#14181f;--muted:#5a6472;--faint:#8b95a5;--line:#e4e7ec;--line-strong:#ccd2db;--grid:rgba(20,32,54,.045);--crit:#b42318;--warn:#b54708;--pass:#067647;--unv:#667085;--code-bg:#0d1526;--sel:#0f74d1}
+:root[data-theme=dark]{--paper:#0e131b;--panel:#141b26;--ink:#e6eaf0;--muted:#9aa4b2;--faint:#6b7688;--line:#232c3a;--line-strong:#33405a;--grid:rgba(255,255,255,.035);--crit:#f97066;--warn:#f5a623;--pass:#5fd08a;--unv:#8b95a7;--code-bg:#070c15;--sel:#4aa3f0}
+:root{--cat-web:#0f74d1;--cat-compute:#0f74d1;--cat-net:#3b5b8f;--cat-data:#0a8f83;--cat-sec:#2e8b57;--cat-dns:#7a52c0;--cat-ai:#c2410c;--cat-integration:#6d3fc0}
+@media (prefers-color-scheme:dark){:root{--cat-web:#4aa3f0;--cat-compute:#4aa3f0;--cat-net:#7d97c8;--cat-data:#3ec6ba;--cat-sec:#5fd08a;--cat-dns:#a98ce0;--cat-ai:#f97316;--cat-integration:#a98ce0}}
+:root[data-theme=light]{--cat-web:#0f74d1;--cat-compute:#0f74d1;--cat-net:#3b5b8f;--cat-data:#0a8f83;--cat-sec:#2e8b57;--cat-dns:#7a52c0;--cat-ai:#c2410c;--cat-integration:#6d3fc0}
+:root[data-theme=dark]{--cat-web:#4aa3f0;--cat-compute:#4aa3f0;--cat-net:#7d97c8;--cat-data:#3ec6ba;--cat-sec:#5fd08a;--cat-dns:#a98ce0;--cat-ai:#f97316;--cat-integration:#a98ce0}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);background-image:radial-gradient(var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:960px;margin:0 auto;padding:44px 28px 80px}
 .kicker{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
 h1{font-family:var(--mono);font-size:24px;font-weight:700;margin:6px 0 0;letter-spacing:-.01em;word-break:break-all}
-.sub{margin-top:6px;color:var(--muted);font-size:13px}
-.sub .type{color:var(--ink);border:1px solid var(--line-strong);border-radius:3px;padding:1px 7px;font-size:12px}
+.sub{margin-top:6px;color:var(--muted);font-size:13px}.sub .type{color:var(--ink);border:1px solid var(--line-strong);border-radius:3px;padding:1px 7px;font-size:12px}
 .meta{margin-top:4px;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
 .verdict{display:flex;gap:14px;align-items:flex-start;margin:26px 0 8px;padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--vc,var(--pass));border-radius:4px}
-.verdict.crit{--vc:var(--crit)} .verdict.warn{--vc:var(--warn)} .verdict.pass{--vc:var(--pass)}
-.verdict .glyph{font-size:20px;line-height:1.2;flex:none}
-.verdict .msg{font-size:15px;font-weight:600}
-.verdict .msg .lead{color:var(--vc,var(--pass))}
-.verdict .counts{margin-top:6px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
-.verdict .counts b{color:var(--ink);font-variant-numeric:tabular-nums}
-.verdict .counts .c-crit{color:var(--crit)}
+.verdict.crit{--vc:var(--crit)}.verdict.warn{--vc:var(--warn)}.verdict.pass{--vc:var(--pass)}
+.verdict .glyph{font-size:20px;line-height:1.2;flex:none}.verdict .msg{font-size:15px;font-weight:600}.verdict .msg .lead{color:var(--vc,var(--pass))}
+.verdict .counts{margin-top:6px;font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}.verdict .counts b{color:var(--ink);font-variant-numeric:tabular-nums}.verdict .counts .c-crit{color:var(--crit)}
 h2{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:40px 0 0;padding-bottom:8px;border-bottom:1px solid var(--line)}
-.diagram{overflow-x:auto;padding:26px 2px 8px}
-.path{display:flex;align-items:flex-start;min-width:min-content}
-.node{flex:0 0 auto;width:128px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px}
-.node .ic{width:44px;height:44px;display:grid;place-items:center;color:var(--catcolor,var(--cat-net))}
-.node .ic svg{width:38px;height:38px;display:block}
-.node .nm{font-family:var(--mono);font-size:12px;font-weight:600;line-height:1.3;word-break:break-all}
+.phint{margin-top:12px;font-size:12px;color:var(--faint)}
+.diagram{overflow-x:auto;padding:18px 2px 8px}.path{display:flex;align-items:flex-start;min-width:min-content}
+.node{flex:0 0 auto;width:128px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;cursor:pointer;padding:8px 4px;border-radius:6px;border:1px solid transparent;transition:border-color .12s,background .12s}
+.node:hover{border-color:var(--line-strong);background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.node:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.node.sel{border-color:var(--sel);background:color-mix(in srgb,var(--sel) 8%,transparent)}
+.node .ic{width:44px;height:44px;display:grid;place-items:center;color:var(--catcolor,var(--cat-net))}.node .ic svg{width:40px;height:40px;display:block;filter:drop-shadow(0 1px 1px rgba(10,20,40,.12))}
+.node .nm{font-family:var(--mono);font-size:12px;font-weight:600;line-height:1.3;word-break:break-all;text-decoration:underline dotted color-mix(in srgb,var(--muted) 50%,transparent);text-underline-offset:3px}
+.node:hover .nm{text-decoration-color:var(--sel)}
 .node .ty{font-size:10.5px;color:var(--faint);margin-top:-3px}
-.node .mk{font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-.node .mk::before{content:"";width:7px;height:7px;border-radius:1px;background:currentColor;transform:rotate(45deg)}
-.mk.crit{color:var(--crit)} .mk.ok{color:var(--pass)}
-.node .branch{margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--bcat,var(--cat-net))}
-.node .branch .drop{width:2px;height:14px;background:var(--line-strong)}
-.node .branch.crit .drop{background:var(--crit)}
-.node .branch .bic{width:26px;height:26px;display:grid;place-items:center}
-.node .branch .bic svg{width:24px;height:24px;display:block}
-.node .branch .bn{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.25;max-width:130px;word-break:break-all}
-.node .branch .bnote{font-size:10px;color:var(--faint)}
-.node .branch.crit .bnote{color:var(--crit);font-weight:600}
-.link{flex:1 1 56px;min-width:56px;align-self:flex-start;margin-top:22px;position:relative;height:2px}
-.link .line{height:2px;background:var(--line-strong)}
-.link::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--line-strong)}
+.node .mk{font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px}.node .mk::before{content:"";width:7px;height:7px;border-radius:1px;background:currentColor;transform:rotate(45deg)}.mk.crit{color:var(--crit)}.mk.ok{color:var(--pass)}
+.branch{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 4px;border-radius:6px;border:1px solid transparent;color:var(--bcat,var(--cat-net))}
+.branch:hover{border-color:var(--line-strong)}.branch:focus-visible{outline:2px solid var(--sel);outline-offset:2px}.branch.sel{border-color:var(--sel);background:color-mix(in srgb,var(--sel) 8%,transparent)}
+.branch .drop{width:2px;height:12px;background:var(--line-strong)}.branch.crit .drop{background:var(--crit)}
+.branch .bic{width:26px;height:26px;display:grid;place-items:center}.branch .bic svg{width:26px;height:26px;display:block}
+.branch .bn{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.25;max-width:130px;word-break:break-all;text-decoration:underline dotted color-mix(in srgb,var(--muted) 50%,transparent);text-underline-offset:2px}
+.branch .bnote{font-size:10px;color:var(--faint)}.branch.crit .bnote{color:var(--crit);font-weight:600}
+.link{flex:1 1 56px;min-width:56px;align-self:flex-start;margin-top:30px;position:relative;height:2px}
+.link .line{height:2px;background:var(--line-strong)}.link::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--line-strong)}
 .link .lab{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;color:var(--muted);font-family:var(--mono)}
-.link.broken .line{background:none;border-top:2px dashed var(--crit);height:0}
-.link.broken::after{border-left-color:var(--crit)}
-.link.broken .lab{color:var(--crit);font-weight:600}
+.link.broken .line{background:none;border-top:2px dashed var(--crit);height:0}.link.broken::after{border-left-color:var(--crit)}.link.broken .lab{color:var(--crit);font-weight:600}
 .link .x{position:absolute;top:-8px;left:50%;transform:translateX(-50%);color:var(--crit);font-weight:800;font-size:14px}
-.flags{margin-top:4px}
-.flag{padding:18px 0;border-bottom:1px solid var(--line)}
-.flag:first-child{border-top:1px solid var(--line)}
-.flag .fh{display:flex;align-items:baseline;gap:10px}
-.flag .fcode{font-family:var(--mono);font-size:11.5px;font-weight:700;color:#fff;background:var(--crit);padding:2px 7px;border-radius:3px}
-.flag.warn .fcode{background:var(--warn)}
-.flag .ftitle{font-size:15px;font-weight:700}
-.flag dl{margin:12px 0 0;display:grid;grid-template-columns:74px 1fr;gap:6px 16px;font-size:13.5px}
-.flag dt{color:var(--muted);font-weight:600} .flag dd{margin:0}
-.flag .m{font-family:var(--mono);font-size:12.5px}
+#inspector{position:relative;margin-top:6px;background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;padding:16px 18px;box-shadow:0 6px 24px rgba(10,20,40,.08)}
+.iclose{position:absolute;top:10px;right:10px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:4px;width:26px;height:26px;cursor:pointer;font-size:13px}
+.iclose:hover{border-color:var(--line-strong);color:var(--ink)}
+.dh{display:flex;align-items:center;gap:10px;font-size:15px;margin-bottom:12px;padding-right:30px}
+.dh .dic{width:26px;height:26px;flex:none}.dh .dic svg{width:26px;height:26px}.dh b{font-family:var(--mono)}.dh .dty{color:var(--faint);font-size:12px;font-weight:400}
+.dkv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:13px}.dkv .dk{color:var(--muted)}
+.dtbl{overflow-x:auto}.dtbl table{border-collapse:collapse;width:100%;font-size:12px;min-width:520px}
+.dtbl th{text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dtbl td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}.dtbl tr:last-child td{border-bottom:none}
+.flags{margin-top:4px}.flag{padding:18px 0;border-bottom:1px solid var(--line)}.flag:first-child{border-top:1px solid var(--line)}
+.flag .fh{display:flex;align-items:baseline;gap:10px}.flag .fcode{font-family:var(--mono);font-size:11.5px;font-weight:700;color:#fff;background:var(--crit);padding:2px 7px;border-radius:3px}.flag.warn .fcode{background:var(--warn)}.flag .ftitle{font-size:15px;font-weight:700}
+.flag dl{margin:12px 0 0;display:grid;grid-template-columns:74px 1fr;gap:6px 16px;font-size:13.5px}.flag dt{color:var(--muted);font-weight:600}.flag dd{margin:0}.flag .m{font-family:var(--mono);font-size:12.5px}
 .flag pre{margin:12px 0 0;background:var(--code-bg);color:var(--code-ink);border-radius:5px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.55}
-.passline{margin-top:16px;font-size:13px;color:var(--muted)}
-.passline b{color:var(--pass);font-family:var(--mono);font-weight:600}
-.tbl{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:5px}
-table{border-collapse:collapse;width:100%;font-size:13px;min-width:660px}
+.passline{margin-top:16px;font-size:13px;color:var(--muted)}.passline b{color:var(--pass);font-family:var(--mono);font-weight:600}
+.tbl{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:5px}table{border-collapse:collapse;width:100%;font-size:13px;min-width:660px}
 thead th{text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
-tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-tbody tr:last-child td{border-bottom:none}
-td.m,.m{font-family:var(--mono);font-size:12px}
-.conf{font-family:var(--mono);font-size:11px;font-weight:600}
-.conf.confirmed{color:var(--pass)} .conf.inferred{color:var(--warn)}
-.dash{color:var(--faint)} .crit-t{color:var(--crit);font-weight:600}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:last-child td{border-bottom:none}
+td.m,.m{font-family:var(--mono);font-size:12px}.conf{font-family:var(--mono);font-size:11px;font-weight:600}.conf.confirmed{color:var(--pass)}.conf.inferred{color:var(--warn)}.dash{color:var(--faint)}.crit-t{color:var(--crit);font-weight:600}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px;line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:640px){.wrap{padding:30px 16px 60px}h1{font-size:20px}}
 </style>
 <svg id="nt-sprite"> sprite VERBATIM,
@@ -236,21 +212,16 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:v
   <h1>contoso-app</h1>
   <div class="sub"><span class="type">App Service</span> network reachability</div>
   <div class="meta">subscription 00000000… · 2026-07-08 · read-only</div>
-
-  <div class="verdict pass">
-    <span class="glyph">🟢</span>
-    <div>
-      <div class="msg"><span class="lead">Reachable</span> — the App Service reaches <span class="m">contoso-sql</span> over the private endpoint; DNS resolves to the private IP.</div>
-      <div class="counts"><span>Blockers <b>0</b></span><span>Warnings <b>0</b></span><span>Passed <b>12</b></span><span>Unverified <b>0</b></span></div>
-    </div>
-  </div>
-
+  <div class="verdict pass"><span class="glyph">🟢</span><div>
+    <div class="msg"><span class="lead">Reachable</span> — the App Service reaches <span class="m">contoso-sql</span> over the private endpoint; DNS resolves to the private IP.</div>
+    <div class="counts"><span>Blockers <b>0</b></span><span>Warnings <b>0</b></span><span>Passed <b>12</b></span><span>Unverified <b>0</b></span></div>
+  </div></div>
   <h2>Path</h2>
-  <div class="diagram"><div class="path"><div class="node"><span class="ic" style="--catcolor:var(--cat-web)"><svg><use href="#nt-appservice"/></svg></span><span class="nm">contoso-app</span><span class="ty">App Service</span><div class="branch " style="--bcat:var(--cat-sec)"><span class="drop"></span><span class="bic"><svg><use href="#nt-keyvault"/></svg></span><span class="bn">contoso-kv</span><span class="bnote">KV ref</span></div></div><div class="link"><div class="line"></div><span class="lab">VNet integration</span></div><div class="node"><span class="ic" style="--catcolor:var(--cat-net)"><svg><use href="#nt-subnet"/></svg></span><span class="nm">snet-appsvc</span><span class="ty">Subnet</span><div class="branch " style="--bcat:var(--cat-net)"><span class="drop"></span><span class="bic"><svg><use href="#nt-nsg"/></svg></span><span class="bn">nsg-appsvc</span><span class="bnote">NSG ok</span></div></div><div class="link"><div class="line"></div><span class="lab">Private Link (Approved)</span></div><div class="node"><span class="ic" style="--catcolor:var(--cat-net)"><svg><use href="#nt-pe"/></svg></span><span class="nm">pe-sql</span><span class="ty">Private Endpoint</span><div class="branch " style="--bcat:var(--cat-dns)"><span class="drop"></span><span class="bic"><svg><use href="#nt-dns"/></svg></span><span class="bn">privatelink.database.windows.net</span><span class="bnote">linked</span></div></div><div class="link"><div class="line"></div><span class="lab">resolves private</span></div><div class="node"><span class="ic" style="--catcolor:var(--cat-data)"><svg><use href="#nt-sql"/></svg></span><span class="nm">contoso-sql</span><span class="ty">SQL Server</span><span class="mk ok">reachable</span></div></div></div>
-
+  <div class="phint">Click a node to inspect that resource's network settings.</div>
+  <div class="diagram"><div class="path"><div class="node" data-detail="app1" role="button" tabindex="0" aria-expanded="false"><span class="ic" style="--catcolor:var(--cat-web)"><svg><use href="#nt-appservice"/></svg></span><span class="nm">contoso-app</span><span class="ty">App Service</span><div class="branch" data-detail="kv1" role="button" tabindex="0" aria-expanded="false" style="--bcat:var(--cat-sec)"><span class="drop"></span><span class="bic"><svg><use href="#nt-keyvault"/></svg></span><span class="bn">contoso-kv</span><span class="bnote">KV ref</span></div></div><div class="link"><div class="line"></div><span class="lab">VNet integration</span></div><div class="node" data-detail="snet" role="button" tabindex="0" aria-expanded="false"><span class="ic" style="--catcolor:var(--cat-net)"><svg><use href="#nt-subnet"/></svg></span><span class="nm">snet-appsvc</span><span class="ty">Subnet</span><div class="branch" data-detail="nsg1" role="button" tabindex="0" aria-expanded="false" style="--bcat:var(--cat-net)"><span class="drop"></span><span class="bic"><svg><use href="#nt-nsg"/></svg></span><span class="bn">nsg-appsvc</span><span class="bnote">NSG ok</span></div></div><div class="link"><div class="line"></div><span class="lab">Private Link (Approved)</span></div><div class="node" data-detail="pe1" role="button" tabindex="0" aria-expanded="false"><span class="ic" style="--catcolor:var(--cat-net)"><svg><use href="#nt-pe"/></svg></span><span class="nm">pe-sql</span><span class="ty">Private Endpoint</span><div class="branch" data-detail="dns1" role="button" tabindex="0" aria-expanded="false" style="--bcat:var(--cat-dns)"><span class="drop"></span><span class="bic"><svg><use href="#nt-dns"/></svg></span><span class="bn">privatelink.database.windows.net</span><span class="bnote">linked</span></div></div><div class="link"><div class="line"></div><span class="lab">resolves private</span></div><div class="node" data-detail="sql1" role="button" tabindex="0" aria-expanded="false"><span class="ic" style="--catcolor:var(--cat-data)"><svg><use href="#nt-sql"/></svg></span><span class="nm">contoso-sql</span><span class="ty">SQL Server</span><span class="mk ok">reachable</span></div></div></div>
+  <div id="inspector" hidden><button class="iclose" aria-label="Close">✕</button><div class="ibody"></div></div>
   <h2>Red flags</h2>
   <div class="flags"><div class="passline">✅ passed: <b>RF-01 … RF-12</b> — no reachability blockers found.</div></div>
-
   <h2>Dependencies</h2>
   <div class="tbl"><table>
     <thead><tr><th>#</th><th>Hop</th><th>Resource</th><th>Type</th><th>Key facts</th><th>Confidence</th><th>Evidence</th></tr></thead>
@@ -262,6 +233,22 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:v
       <tr><td>5</td><td>dns</td><td class="m">privatelink.database.windows.net</td><td>Private DNS zone</td><td>linked to contoso-vnet</td><td class="dash">—</td><td class="dash">—</td></tr>
     </tbody>
   </table></div>
-
-  <footer>Secrets masked. Icons: azure-nettrace built-in set (license-safe). For the official Microsoft Azure icons, see references/output-html.md → Official icon mode.</footer>
+  <footer>Secrets masked. Icons: azure-nettrace built-in set (license-safe). For the official Microsoft Azure icons, see references/output-html.md → Official icon mode. Click a node for details.</footer>
 </div>
+<div id="nt-details" hidden><div data-for="app1"><div class="dh"><span class="dic"><svg><use href="#nt-appservice"/></svg></span><b>contoso-app</b><span class="dty">App Service · network settings</span></div><div class="dkv"><div class="dk">VNet integration subnet</div><div class="dv m">snet-appsvc</div><div class="dk">vnetRouteAllEnabled</div><div class="dv m">true</div><div class="dk">Outbound IPs</div><div class="dv m">20.x.x.x (masked)</div><div class="dk">Access restrictions</div><div class="dv m">none</div><div class="dk">publicNetworkAccess</div><div class="dv m">Enabled</div></div></div><div data-for="snet"><div class="dh"><span class="dic"><svg><use href="#nt-subnet"/></svg></span><b>snet-appsvc</b><span class="dty">Subnet · settings</span></div><div class="dkv"><div class="dk">Address prefix</div><div class="dv m">10.20.1.0/24</div><div class="dk">NSG</div><div class="dv m">nsg-appsvc</div><div class="dk">Route table</div><div class="dv m">none</div><div class="dk">Delegation</div><div class="dv m">Microsoft.Web/serverFarms</div><div class="dk">Service endpoints</div><div class="dv m">none</div></div></div><div data-for="nsg1"><div class="dh"><span class="dic"><svg><use href="#nt-nsg"/></svg></span><b>nsg-appsvc</b><span class="dty">NSG · security rules</span></div><div class="dtbl"><table><thead><tr><th>Prio</th><th>Name</th><th>Dir</th><th>Access</th><th>Proto</th><th>Port</th><th>Source</th><th>Dest</th></tr></thead><tbody><tr><td>100</td><td>AllowSqlOut</td><td>Out</td><td>Allow</td><td>Tcp</td><td>1433</td><td>*</td><td>Sql tag</td></tr><tr><td>65000</td><td>AllowVnetInBound</td><td>In</td><td>Allow</td><td>Any</td><td>Any</td><td>VNet</td><td>VNet</td></tr><tr><td>65000</td><td>AllowVnetOutBound</td><td>Out</td><td>Allow</td><td>Any</td><td>Any</td><td>VNet</td><td>VNet</td></tr><tr><td>65500</td><td>DenyAllInBound</td><td>In</td><td>Deny</td><td>Any</td><td>Any</td><td>*</td><td>*</td></tr></tbody></table></div></div><div data-for="pe1"><div class="dh"><span class="dic"><svg><use href="#nt-pe"/></svg></span><b>pe-sql</b><span class="dty">Private Endpoint · settings</span></div><div class="dkv"><div class="dk">Private IP</div><div class="dv m">10.20.2.4</div><div class="dk">Connection state</div><div class="dv m">Approved</div><div class="dk">groupId</div><div class="dv m">sqlServer</div><div class="dk">Subnet</div><div class="dv m">snet-pe</div><div class="dk">DNS zone group</div><div class="dv m">default → privatelink.database.windows.net</div></div></div><div data-for="dns1"><div class="dh"><span class="dic"><svg><use href="#nt-dns"/></svg></span><b>privatelink.database.windows.net</b><span class="dty">Private DNS zone · settings</span></div><div class="dkv"><div class="dk">VNet links</div><div class="dv m">1 (contoso-vnet)</div><div class="dk">A record</div><div class="dv m">contoso-sql → 10.20.2.4</div><div class="dk">Auto-registration</div><div class="dv m">disabled</div></div></div><div data-for="sql1"><div class="dh"><span class="dic"><svg><use href="#nt-sql"/></svg></span><b>contoso-sql</b><span class="dty">SQL Server · network settings</span></div><div class="dkv"><div class="dk">publicNetworkAccess</div><div class="dv m">Disabled</div><div class="dk">Firewall rules</div><div class="dv m">none</div><div class="dk">VNet rules</div><div class="dv m">none</div><div class="dk">Private Endpoint</div><div class="dv m">pe-sql (Approved)</div><div class="dk">Min TLS</div><div class="dv m">1.2</div></div></div><div data-for="kv1"><div class="dh"><span class="dic"><svg><use href="#nt-keyvault"/></svg></span><b>contoso-kv</b><span class="dty">Key Vault · network settings</span></div><div class="dkv"><div class="dk">publicNetworkAccess</div><div class="dv m">Enabled</div><div class="dk">networkAcls.defaultAction</div><div class="dv m">Allow</div><div class="dk">bypass</div><div class="dv m">AzureServices</div><div class="dk">RBAC authorization</div><div class="dv m">enabled</div><div class="dk">Private Endpoint</div><div class="dv m">none</div></div></div></div>
+<script>
+(function(){
+  var store=document.getElementById('nt-details'),insp=document.getElementById('inspector');
+  if(!store||!insp)return;
+  var body=insp.querySelector('.ibody'),cur=null;
+  function openEl(el){var d=store.querySelector('[data-for="'+el.getAttribute('data-detail')+'"]');if(!d)return;
+    body.innerHTML=d.innerHTML;insp.hidden=false;if(cur)cur.classList.remove('sel');cur=el;el.classList.add('sel');el.setAttribute('aria-expanded','true');
+    var rm=matchMedia('(prefers-reduced-motion:reduce)').matches;insp.scrollIntoView({behavior:rm?'auto':'smooth',block:'nearest'});}
+  function closeIt(){insp.hidden=true;if(cur){cur.classList.remove('sel');cur.setAttribute('aria-expanded','false');cur=null;}}
+  document.querySelectorAll('[data-detail]').forEach(function(el){
+    el.addEventListener('click',function(ev){ev.stopPropagation();el===cur?closeIt():openEl(el);});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();el===cur?closeIt():openEl(el);}});});
+  insp.querySelector('.iclose').addEventListener('click',closeIt);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeIt();});
+})();
+</script>

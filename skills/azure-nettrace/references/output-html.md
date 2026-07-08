@@ -32,12 +32,57 @@ inline/terminal output.
       an unverified list for ⚪.
    5. **Dependencies** (`<h2>` + `.tbl > table`) — hop rows with confidence & evidence.
    6. **footer** — masking notice + icon attribution.
-3. Write the file to `out/trace-<resource>-<lang>.html` (the `out/` dir is gitignored —
+3. After the diagram, emit the `<div id="inspector" hidden>` panel, and near the end of
+   `<body>` the `<div id="nt-details" hidden>` store and the `<script>` — all three
+   **verbatim** from `assets/report-template.html` (only the detail blocks inside the
+   store change). See § Interactivity.
+4. Write the file to `out/trace-<resource>-<lang>.html` (the `out/` dir is gitignored —
    never commit real trace output). Tell the user the path and that opening it in a
    browser renders the diagram.
 
 The file is plain HTML — it renders by double-clicking. Do not add external `<script>`
-or `<link>`; keep it self-contained.
+or `<link>`; keep it self-contained (an inline `<script>` is fine).
+
+## Interactivity (click to inspect)
+
+Every node **and** branch is clickable: clicking it shows that resource's network
+settings in the `#inspector` panel below the diagram. This is what makes the report a
+verification tool — press the NSG to read its rules, the SQL server to see its firewall,
+the DNS zone to see its VNet links, etc.
+
+Wiring (all provided verbatim in the template — copy, don't re-invent):
+
+1. Make each `.node` / `.branch` interactive: `data-detail="<key>" role="button"
+   tabindex="0" aria-expanded="false"` (the CSS already gives hover/focus/selected cues
+   and a dotted underline on the name).
+2. Put one block per key inside `#nt-details`:
+   ```html
+   <div data-for="nsg1">
+     <div class="dh"><span class="dic"><svg><use href="#nt-nsg"/></svg></span>
+       <b>nsg-appsvc</b><span class="dty">NSG · security rules</span></div>
+     <!-- .dkv key/value grid, or .dtbl table -->
+   </div>
+   ```
+   Use `.dkv` (a key/value grid) for settings and `.dtbl` (a table) for rule lists.
+3. The `<script>` toggles the matching block into the inspector on click / Enter / Space,
+   Esc closes, and only one is open at a time. Keep it verbatim.
+
+What to show per resource (network-relevant only; **mask secrets**):
+
+| Resource | Inspector content |
+|---|---|
+| App Service / Functions | VNet-integration subnet, `vnetRouteAllEnabled`, outbound IPs, access restrictions, `publicNetworkAccess`, PE |
+| Subnet | address prefix, NSG, route table, delegations, service endpoints |
+| **NSG** | `.dtbl` of security rules: priority, name, direction, access, protocol, ports, source, destination |
+| Route table | `.dtbl` of routes: prefix, next-hop type, next-hop IP |
+| Private Endpoint | private IP, connection state, `groupId`, subnet, DNS zone group |
+| Private DNS zone | VNet links (linked VNet + state), relevant A records, auto-registration |
+| SQL / PG / MySQL | `publicNetworkAccess`, firewall rules, VNet rules, PE, min TLS |
+| Storage / Key Vault / Cosmos | `publicNetworkAccess`, `networkAcls` (defaultAction/ipRules/vnetRules/bypass), PE, RBAC |
+| Azure Firewall | rule collections that matched the traced flow (the deciding allow/deny) |
+| others | the same generic facts the fallback collected (public access, networkAcls, PE) |
+
+Highlight a value that is the root cause in red (`<b style="color:var(--crit)">…</b>`).
 
 ## Path schematic
 
@@ -159,6 +204,10 @@ Use the column for `lang`. Left = key.
 | verdictReach | Reachable | 到達可 |
 | verdictBlocked | unreachable | 到達不可 |
 | kvref | KV ref | KV参照 |
+| clickHint | Click a node to inspect that resource's network settings. | ノードをクリックすると、そのリソースのネットワーク設定を確認できます。 |
+| close | Close | 閉じる |
+| netSettings | network settings | ネットワーク設定 |
+| secRules | security rules | セキュリティ規則 |
 | footerBuiltin | Secrets masked. Icons: azure-nettrace built-in set. | シークレットはマスク済み。アイコンは azure-nettrace 内蔵セット。 |
 | footerOfficial | Secrets masked. Icons: Microsoft Azure official architecture icons. | シークレットはマスク済み。アイコン: Microsoft Azure 公式アーキテクチャアイコン。 |
 
