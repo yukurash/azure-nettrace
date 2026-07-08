@@ -57,6 +57,7 @@ adapter file from `references/adapters/`:
 | `microsoft.sql/servers`, `microsoft.dbforpostgresql/`, `microsoft.dbformysql/` | `data-sql.md` |
 | `microsoft.storage/storageaccounts`, `microsoft.keyvault/vaults`, `microsoft.documentdb/` | `data-storage.md` |
 | `microsoft.apimanagement/service` | `apim.md` |
+| `microsoft.cognitiveservices/accounts`, `microsoft.machinelearningservices/workspaces` | `foundry.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
