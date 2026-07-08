@@ -1,0 +1,56 @@
+name: lint
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: |
+            **/*.md
+            #node_modules
+
+  mermaid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mermaid block sanity check (browserless)
+        run: |
+          # Full render validation (mmdc) needs a headless browser and is run
+          # locally before commit. In CI we do a fast structural check: every
+          # ```mermaid block must be non-empty and start with a known diagram
+          # keyword. Catches empty/typo'd/mis-fenced blocks deterministically.
+          mkdir -p .mmd
+          while IFS= read -r -d '' f; do
+            base=$(echo "$f" | tr '/.' '__')
+            awk -v pfx=".mmd/${base}" '
+              /^```mermaid$/ {flag=1; n++; out=pfx"_"n".mmd"; next}
+              /^```/ {flag=0; next}
+              flag {print > out}
+            ' "$f"
+          done < <(find . -name '*.md' -not -path './node_modules/*' -not -path './.mmd/*' -print0)
+          count=0; fail=0
+          keywords='flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|pie|journey|gitGraph|mindmap|timeline|quadrantChart|C4Context'
+          for m in .mmd/*.mmd; do
+            [ -e "$m" ] || continue
+            count=$((count+1))
+            first=$(grep -vE '^\s*(%%|$)' "$m" | head -1)
+            if [ -z "$(tr -d '[:space:]' < "$m")" ]; then
+              echo "::error::Empty Mermaid block in $m"; fail=1
+            elif ! echo "$first" | grep -qE "^\s*($keywords)"; then
+              echo "::error::Mermaid block in $m does not start with a known diagram type (got: '$first')"; fail=1
+            fi
+          done
+          echo "Checked $count Mermaid block(s)."
+          rm -rf .mmd
+          exit $fail

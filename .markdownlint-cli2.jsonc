@@ -1,0 +1,15 @@
+{
+  // Opt-in policy: disable everything by default, enable only rules that catch
+  // real rendering/correctness bugs. This keeps CI deterministic across
+  // markdownlint versions (new cosmetic rules can't spuriously break the build).
+  "config": {
+    "default": false,
+    "MD037": true,  // spaces inside emphasis markers (accidental italics)
+    "MD039": true,  // spaces inside link text
+    "MD011": true,  // reversed link/image syntax
+    "MD042": true,  // no empty links
+    "MD056": true   // table column count mismatch
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules"]
+}
