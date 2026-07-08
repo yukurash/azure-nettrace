@@ -58,6 +58,7 @@ adapter file from `references/adapters/`:
 | `microsoft.storage/storageaccounts`, `microsoft.keyvault/vaults`, `microsoft.documentdb/` | `data-storage.md` |
 | `microsoft.apimanagement/service` | `apim.md` |
 | `microsoft.cognitiveservices/accounts`, `microsoft.machinelearningservices/workspaces` | `foundry.md` |
+| `microsoft.app/containerapps`, `microsoft.app/managedenvironments` | `container-apps.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
