@@ -2,6 +2,9 @@
 out/
 notes/
 .local/
+
+# Official Microsoft Azure icon set (do NOT redistribute; see references/output-html.md)
+skills/azure-nettrace/assets/azure-icons/
 *.local.md
 .env
 .env.*

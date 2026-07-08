@@ -61,6 +61,21 @@ Now ask Claude Code:
 
 > **trace the network connectivity of `<your-app-service-name>`**
 
+## Output
+
+By default the skill writes a **self-contained HTML report** to `out/` — a
+left-to-right path diagram with Azure resource icons, severity-striped node cards, a
+red-flag panel, and dependency tables. Open the file in a browser (light/dark aware, no
+internet needed). Pass `format: markdown` for inline Mermaid + tables instead.
+
+- **Language**: `lang: ja` or `lang: en` (the skill asks if you don't say).
+- **Icons**: a license-safe built-in icon set ships with the skill. To use the
+  **official** Microsoft Azure architecture icons, download the set into
+  `skills/azure-nettrace/assets/azure-icons/` (gitignored) and pass `iconStyle: official`
+  — see [`references/output-html.md`](skills/azure-nettrace/references/output-html.md).
+
+`assets/report-template.html` is a runnable reference report you can open directly.
+
 ## Examples
 
 See [`examples/`](examples/) for sanitized sample output:
