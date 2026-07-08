@@ -1,0 +1,11 @@
+{
+  // Relaxed rules — docs favor readability over strict style
+  "config": {
+    "MD013": false,   // line length
+    "MD033": false,   // inline HTML (used in Mermaid labels / tables)
+    "MD041": false,   // first line heading
+    "MD024": { "siblings_only": true }
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules"]
+}
