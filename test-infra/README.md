@@ -24,9 +24,11 @@ A minimal, disposable environment to validate `azure-nettrace` end to end:
 
 ```bash
 az group create -n rg-nettrace-test -l japaneast
-# SQL requires an admin password; pass it at deploy time (never commit it)
+# SQL uses Entra-ID-only auth. Pass your own identity as the AD admin at deploy time.
+OID=$(az ad signed-in-user show --query id -o tsv)
+UPN=$(az ad signed-in-user show --query userPrincipalName -o tsv)
 az deployment group create -g rg-nettrace-test -f main.bicep \
-  -p breakScenario=none -p sqlAdminPassword="$(openssl rand -base64 24)Aa1!"
+  -p breakScenario=none -p sqlAdAdminLogin="$UPN" -p sqlAdAdminObjectId="$OID"
 ```
 
 Then, in Claude Code: **"trace the network connectivity of app-nettrace-xxxxx"**.
