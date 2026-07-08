@@ -65,6 +65,7 @@ adapter file from `references/adapters/`:
 | `microsoft.search/searchservices` | `ai-search.md` |
 | `microsoft.network/applicationgateways` | `app-gateway.md` |
 | `microsoft.cdn/profiles` | `front-door.md` |
+| `microsoft.network/azurefirewalls` | `azure-firewall.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
