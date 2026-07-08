@@ -1,0 +1,20 @@
+# Local-only working files (never commit real environment output)
+out/
+notes/
+.local/
+*.local.md
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Node
+node_modules/
+
+# Bicep build artifacts
+*.json.bicep.tmp
+test-infra/*.json
+!test-infra/*.parameters.example.json
