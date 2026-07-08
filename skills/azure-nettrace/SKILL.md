@@ -6,7 +6,7 @@ description: >
   subnets, NSGs, route tables (UDR), private endpoints, private DNS zones and
   target-side firewalls; infers outbound connection targets from app settings /
   connection strings / Key Vault references (secrets are always masked); outputs a
-  Mermaid diagram + Markdown tables + a red-flag list of reachability blockers.
+  browsable HTML report (Azure icons + path diagram + red-flag list), or Markdown.
   Trigger on: connectivity trace, 接続性トレース, ネットワーク経路, 到達性診断,
   "why can't X reach Y", "App Service から DB につながらない", "trace network of <resource>".
 ---
@@ -14,7 +14,17 @@ description: >
 # azure-nettrace — single-resource connectivity trace
 
 You are tracing the network connectivity of **one** Azure resource and producing a
-single Markdown artifact: Mermaid diagram + dependency tables + red-flag list.
+single report: a path diagram + dependency tables + red-flag list.
+
+## Options (ask if unset)
+
+- **`lang`**: `ja` | `en` — output language for all labels/narrative (identifiers stay
+  verbatim). If the user hasn't said, ask which they want.
+- **`format`**: `html` (default — a self-contained file the user opens in a browser,
+  with Azure icons; see `references/output-html.md`) | `markdown` (inline Mermaid +
+  tables; see `references/output-format.md`).
+- **`iconStyle`**: `builtin` (default) | `official` (embed the official Azure icons —
+  see `references/output-html.md` → Official icon mode).
 
 ## Ground rules (read first)
 
@@ -94,12 +104,19 @@ Read `references/redflags.md`. Evaluate every rule RF-01…RF-12 against the fac
 Each rule yields: 🔴 blocker / 🟡 warning / ✅ pass / ⚪ unverified (+ reason).
 
 ### Phase 6 — Render output
-Read `references/output-format.md` and produce the single Markdown artifact:
-1. Header + masking notice
-2. Mermaid diagram (node-ID rules from the template — alphanumeric IDs, quoted labels)
-3. Dependency table (hop-by-hop, with confidence & evidence columns)
-4. Red-flag list (🔴 first, then 🟡, then ⚪; ✅ summarized in one line)
-5. "Unverified" appendix when anything could not be checked
+Render in the requested `lang`.
+
+- **`format: html` (default):** follow `references/output-html.md`. Copy the `<style>`
+  and `<svg id="nt-sprite">` sprite from `assets/report-template.html` verbatim, build
+  the body (header + masking notice → summary chips → path diagram with Azure icons →
+  red-flag panel → dependency table → footer), and write it to
+  `out/trace-<resource>-<lang>.html`. Tell the user the path and that opening it in a
+  browser renders the diagram.
+- **`format: markdown`:** follow `references/output-format.md` (Mermaid + tables).
+
+Common content in both: masking notice; path source→target; dependency table with
+confidence & evidence; red flags 🔴→🟡→⚪ with ✅ summarized; an unverified list when
+anything could not be checked.
 
 ## Failure handling
 

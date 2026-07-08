@@ -1,0 +1,226 @@
+<!--
+  azure-nettrace HTML report — canonical template & reference output.
+  This is a complete, runnable example (English, a healthy trace).
+  The skill produces reports by:
+    1. copying the <style> block and the <svg id="nt-sprite"> sprite VERBATIM,
+    2. building the <body> with the same structure, in the requested language,
+       from the actual trace facts.
+  See references/output-html.md for the label dictionary, icon map, severity
+  rules and the official-icon mode. Self-contained: no external JS/CSS/fonts.
+-->
+<title>Connectivity trace: contoso-app</title>
+<style>
+  :root {
+    --paper:#f5f7fb; --panel:#fff; --ink:#0e1726; --muted:#5b6678; --line:#dde3ee; --line-strong:#c6cfde;
+    --accent:#1e6fe0; --accent-soft:#eaf1fd; --crit:#e5484d; --crit-soft:#fdecec; --warn:#b7791f; --warn-soft:#fbf3e2;
+    --pass:#2e9e5b; --pass-soft:#e9f6ee; --unv:#8b95a7; --unv-soft:#eef1f6;
+    --cat-web:#1e6fe0; --cat-compute:#1e6fe0; --cat-net:#5566a8; --cat-data:#0f9d8f; --cat-sec:#2e9e5b;
+    --cat-dns:#8a5cd1; --cat-ai:#c2410c; --cat-integration:#7c3aed;
+    --radius:12px; --shadow:0 1px 2px rgba(14,23,38,.06),0 8px 24px rgba(14,23,38,.05);
+    --mono:ui-monospace,"Cascadia Code","Consolas","SF Mono",monospace;
+    --sans:ui-sans-serif,system-ui,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){ :root{
+    --paper:#0c1220; --panel:#131c2e; --ink:#e8edf6; --muted:#98a3b8; --line:#243149; --line-strong:#324063;
+    --accent:#5c9bff; --accent-soft:#182741; --crit:#ff6b6f; --crit-soft:#2a1720; --warn:#e6b24d; --warn-soft:#2a2214;
+    --pass:#4fc27e; --pass-soft:#12281c; --unv:#8b95a7; --unv-soft:#1a2233; --cat-net:#8595d6; --cat-dns:#b48ce8; --cat-ai:#f97316;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="light"]{
+    --paper:#f5f7fb;--panel:#fff;--ink:#0e1726;--muted:#5b6678;--line:#dde3ee;--line-strong:#c6cfde;
+    --accent:#1e6fe0;--accent-soft:#eaf1fd;--crit:#e5484d;--crit-soft:#fdecec;--warn:#b7791f;--warn-soft:#fbf3e2;
+    --pass:#2e9e5b;--pass-soft:#e9f6ee;--unv:#8b95a7;--unv-soft:#eef1f6;--cat-net:#5566a8;--cat-dns:#8a5cd1;--cat-ai:#c2410c;
+    --shadow:0 1px 2px rgba(14,23,38,.06),0 8px 24px rgba(14,23,38,.05);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c1220;--panel:#131c2e;--ink:#e8edf6;--muted:#98a3b8;--line:#243149;--line-strong:#324063;
+    --accent:#5c9bff;--accent-soft:#182741;--crit:#ff6b6f;--crit-soft:#2a1720;--warn:#e6b24d;--warn-soft:#2a2214;
+    --pass:#4fc27e;--pass-soft:#12281c;--unv:#8b95a7;--unv-soft:#1a2233;--cat-net:#8595d6;--cat-dns:#b48ce8;--cat-ai:#f97316;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 24px 72px}
+  .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  h1{font-size:26px;margin:6px 0 0;letter-spacing:-.01em;text-wrap:balance}
+  h1 .mono{font-family:var(--mono);font-weight:700}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;color:var(--muted);font-size:13px}
+  .meta code{font-family:var(--mono);color:var(--ink);background:var(--unv-soft);padding:1px 6px;border-radius:5px}
+  .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:10px 14px;background:var(--accent-soft);
+    border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:10px;font-size:13px;color:var(--ink)}
+  .notice svg{flex:none;width:16px;height:16px;color:var(--accent);margin-top:2px}
+  .summary{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 8px}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--panel)}
+  .chip b{font-variant-numeric:tabular-nums}
+  .chip.crit{background:var(--crit-soft);border-color:color-mix(in srgb,var(--crit) 30%,transparent);color:var(--crit)}
+  .chip.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent);color:var(--warn)}
+  .chip.pass{background:var(--pass-soft);border-color:color-mix(in srgb,var(--pass) 30%,transparent);color:var(--pass)}
+  .chip.unv{background:var(--unv-soft);border-color:var(--line-strong);color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+  section{margin-top:34px}
+  .sec-title{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
+  .sec-title h2{font-size:15px;margin:0;letter-spacing:.02em}
+  .sec-title .hint{color:var(--muted);font-size:12px}
+  .flow-scroll{overflow-x:auto;padding:4px 2px 12px}
+  .flow{display:flex;align-items:stretch;min-width:min-content}
+  .tier{display:flex;flex-direction:column;gap:12px}
+  .tier-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 2px 2px}
+  .node{position:relative;width:210px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:13px 14px 13px 16px;overflow:hidden}
+  .node::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--catcolor,var(--accent))}
+  .node.crit::before{background:var(--crit)} .node.warn::before{background:var(--warn)}
+  .node-top{display:flex;align-items:center;gap:9px}
+  .node .ic{width:26px;height:26px;flex:none;color:var(--catcolor,var(--accent))}
+  .node .ic svg{width:100%;height:100%}
+  .node .kind{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .node .name{font-family:var(--mono);font-size:13.5px;font-weight:600;word-break:break-all;margin-top:1px}
+  .node .facts{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+  .node .facts li{font-size:11.5px;color:var(--muted);display:flex;gap:6px}
+  .node .facts b{color:var(--ink);font-weight:600;font-family:var(--mono)}
+  .badge{display:inline-flex;align-items:center;gap:5px;margin-top:11px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
+  .badge.crit{background:var(--crit-soft);color:var(--crit)} .badge.ok{background:var(--pass-soft);color:var(--pass)}
+  .attach{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .attach .a{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);background:var(--unv-soft);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+  .attach .a svg{width:13px;height:13px;color:var(--catcolor,var(--accent))}
+  .conn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 6px;min-width:112px}
+  .conn .label{font-size:11px;color:var(--muted);text-align:center;margin-bottom:5px;max-width:110px}
+  .conn .arrow{width:100%;height:2px;background:linear-gradient(90deg,var(--line-strong),var(--accent));position:relative}
+  .conn .arrow::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--accent)}
+  .conn.dashed .arrow{background:none;border-top:2px dashed var(--crit)} .conn.dashed .arrow::after{border-left-color:var(--crit)}
+  .conn.dashed .label{color:var(--crit);font-weight:600}
+  .rf{display:flex;flex-direction:column;gap:12px}
+  .flag{border:1px solid var(--line);border-left-width:4px;border-radius:10px;background:var(--panel);padding:14px 16px;box-shadow:var(--shadow)}
+  .flag.crit{border-left-color:var(--crit)} .flag.warn{border-left-color:var(--warn)}
+  .flag-head{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px}
+  .flag-head .code{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:600;margin-left:auto}
+  .flag dl{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+  .flag dt{color:var(--muted);font-weight:600} .flag dd{margin:0}
+  .flag pre{margin:11px 0 0;background:#0b111d;color:#e8edf6;border-radius:8px;padding:11px 13px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.5}
+  .name-m{font-family:var(--mono)}
+  .passline{margin-top:2px;font-size:13px;color:var(--muted)} .passline b{color:var(--pass);font-family:var(--mono)}
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+  thead th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:11px 14px;background:var(--unv-soft);border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top} tbody tr:last-child td{border-bottom:none}
+  td .m,.name-m{font-family:var(--mono);font-size:12.5px}
+  .conf{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .conf.confirmed{background:var(--pass-soft);color:var(--pass)} .conf.inferred{background:var(--warn-soft);color:var(--warn)} .conf.corroborating{background:var(--unv-soft);color:var(--muted)}
+  .dash{color:var(--muted)}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  @media (max-width:640px){.wrap{padding:28px 16px 56px}h1{font-size:22px}}
+</style>
+
+<!-- ICON SPRITE — copy verbatim. Node category color comes from --catcolor on the node.
+     symbol ids follow nt-<key>; see references/output-html.md for the type→key map. -->
+<svg id="nt-sprite" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="nt-appservice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.3 2.6 14.7 0 17M12 3.5c-2.6 2.3-2.6 14.7 0 17"/></symbol>
+  <symbol id="nt-function" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-2 8 8-10h-6z"/></symbol>
+  <symbol id="nt-vm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8.5 20h7M12 16.5V20"/></symbol>
+  <symbol id="nt-aks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 4.3v8.6L12 20.2 4.5 15.9V7.3z"/><path d="M12 8.2l3.5 2v3.6L12 15.8l-3.5-2v-3.6z"/></symbol>
+  <symbol id="nt-containerapp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/></symbol>
+  <symbol id="nt-sql" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.6"/><path d="M5 5.5v13c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6v-13"/><path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6"/></symbol>
+  <symbol id="nt-storage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="5" rx="1.4"/><rect x="3.5" y="13.5" width="17" height="5" rx="1.4"/><path d="M7 7.5h.01M7 16h.01"/></symbol>
+  <symbol id="nt-cosmos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><ellipse cx="12" cy="12" rx="10" ry="3.6" transform="rotate(30 12 12)"/></symbol>
+  <symbol id="nt-keyvault" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4"/><path d="M12 12l6 6M15 15l2-2M17 17l2-2"/></symbol>
+  <symbol id="nt-redis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5"/></symbol>
+  <symbol id="nt-messaging" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12" rx="1.6"/><path d="M4 7l8 6 8-6"/></symbol>
+  <symbol id="nt-acr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1.6"/><path d="M8 8h4v4H8zM14 8h2M14 11h2M8 15h8"/></symbol>
+  <symbol id="nt-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></symbol>
+  <symbol id="nt-foundry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M4.2 7.5l3.4 2M16.4 14.5l3.4 2M19.8 7.5l-3.4 2M7.6 14.5l-3.4 2"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="nt-vnet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M12 12H6v4M12 12h6v4"/></symbol>
+  <symbol id="nt-subnet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2" stroke-dasharray="3 3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.4"/></symbol>
+  <symbol id="nt-nsg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9.5 12l2 2 3.5-3.5"/></symbol>
+  <symbol id="nt-routetable" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M12 6h6l2 2-2 2h-6M12 13H6l-2 2 2 2h6"/></symbol>
+  <symbol id="nt-pe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6-3.5 3.5-6-6z"/><path d="M9 9l-4.5 4.5a3 3 0 004.2 4.2L13 13"/><path d="M4 20l2.5-2.5"/></symbol>
+  <symbol id="nt-dns" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5a13 13 0 010 17M12 3.5a13 13 0 000 17"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="nt-firewall" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path d="M3.5 9.5h17M3.5 14.5h17M9 4.5v5M15 9.5v5M9 14.5v5"/></symbol>
+  <symbol id="nt-appgateway" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9l8-5 8 5v11"/><path d="M9.5 20v-6h5v6"/></symbol>
+  <symbol id="nt-frontdoor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5a13 13 0 010 17M12 3.5a13 13 0 000 17"/></symbol>
+  <symbol id="nt-lb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M6 21V11M18 21V11M4 11h16"/><circle cx="12" cy="4" r="1.6"/></symbol>
+  <symbol id="nt-generic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <div class="eyebrow">azure-nettrace · connectivity trace</div>
+  <h1>Network reachability of <span class="mono">contoso-app</span></h1>
+  <div class="meta">
+    <span>Type <code>App Service</code></span>
+    <span>Subscription <code>00000000…</code></span>
+    <span>Generated 2026-07-08</span>
+    <span>read-only trace</span>
+  </div>
+  <div class="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".6" fill="currentColor"/><path d="M12 3l9 16H3z"/></svg>
+    <span>Secrets in configuration values are masked. This output still contains resource names and private IPs — handle accordingly.</span>
+  </div>
+
+  <div class="summary">
+    <span class="chip crit"><span class="dot"></span>Blockers <b>0</b></span>
+    <span class="chip warn"><span class="dot"></span>Warnings <b>0</b></span>
+    <span class="chip pass"><span class="dot"></span>Passed <b>12</b></span>
+    <span class="chip unv"><span class="dot"></span>Unverified <b>0</b></span>
+  </div>
+
+  <section>
+    <div class="sec-title"><h2>Path</h2><span class="hint">source → target, left to right</span></div>
+    <div class="flow-scroll"><div class="flow">
+      <div class="tier"><div class="tier-head">Source</div>
+        <div class="node" style="--catcolor:var(--cat-web)">
+          <div class="node-top"><span class="ic"><svg><use href="#nt-appservice"/></svg></span><div><div class="kind">App Service</div><div class="name">contoso-app</div></div></div>
+          <ul class="facts"><li>VNet integration <b>on</b></li><li>routeAll <b>true</b></li></ul>
+          <div class="attach"><span class="a"><svg><use href="#nt-keyvault"/></svg>KV ref: KV_SECRET</span></div>
+        </div>
+      </div>
+      <div class="conn"><div class="label">VNet integration</div><div class="arrow"></div></div>
+      <div class="tier"><div class="tier-head">Egress</div>
+        <div class="node" style="--catcolor:var(--cat-net)">
+          <div class="node-top"><span class="ic"><svg><use href="#nt-subnet"/></svg></span><div><div class="kind">Subnet</div><div class="name">snet-appsvc</div></div></div>
+          <ul class="facts"><li>deleg <b>Web/serverFarms</b></li></ul>
+          <div class="attach"><span class="a"><svg><use href="#nt-nsg"/></svg>nsg-appsvc</span></div>
+        </div>
+      </div>
+      <div class="conn"><div class="label">Private Link<br>(Approved)</div><div class="arrow"></div></div>
+      <div class="tier"><div class="tier-head">Private link</div>
+        <div class="node" style="--catcolor:var(--cat-net)">
+          <div class="node-top"><span class="ic"><svg><use href="#nt-pe"/></svg></span><div><div class="kind">Private Endpoint</div><div class="name">pe-sql</div></div></div>
+          <ul class="facts"><li>IP <b>10.20.2.4</b></li><li>state <b>Approved</b></li></ul>
+        </div>
+        <div class="node" style="--catcolor:var(--cat-dns)">
+          <div class="node-top"><span class="ic"><svg><use href="#nt-dns"/></svg></span><div><div class="kind">Private DNS zone</div><div class="name">privatelink.database.windows.net</div></div></div>
+          <ul class="facts"><li>linked <b>yes</b></li></ul>
+          <span class="badge ok">A: contoso-sql → 10.20.2.4</span>
+        </div>
+      </div>
+      <div class="conn"><div class="label">resolves private</div><div class="arrow"></div></div>
+      <div class="tier"><div class="tier-head">Target</div>
+        <div class="node" style="--catcolor:var(--cat-data)">
+          <div class="node-top"><span class="ic"><svg><use href="#nt-sql"/></svg></span><div><div class="kind">SQL Server</div><div class="name">contoso-sql</div></div></div>
+          <ul class="facts"><li>publicNetworkAccess <b>Disabled</b></li><li>PE <b>Approved</b></li></ul>
+          <span class="badge ok">reachable</span>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><h2>Red flags</h2><span class="hint">most severe first</span></div>
+    <div class="rf">
+      <div class="passline">✅ passed: <b>RF-01 RF-02 RF-03 RF-04 RF-05 RF-06 RF-07 RF-08 RF-09 RF-10 RF-11 RF-12</b> — no reachability blockers found.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-title"><h2>Dependencies</h2><span class="hint">hop by hop, with confidence &amp; evidence</span></div>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>#</th><th>Hop</th><th>Resource</th><th>Type</th><th>Key facts</th><th>Confidence</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>source</td><td class="m">contoso-app</td><td>App Service</td><td>vnetRouteAll=true</td><td class="dash">—</td><td class="dash">—</td></tr>
+        <tr><td>2</td><td>egress subnet</td><td class="m">snet-appsvc</td><td>Subnet</td><td>NSG=nsg-appsvc / deleg=Web/serverFarms</td><td class="dash">—</td><td class="dash">—</td></tr>
+        <tr><td>3</td><td>target</td><td class="m">contoso-sql</td><td>SQL Server</td><td>PNA=Disabled / PE=Approved@snet-pe</td><td><span class="conf confirmed">confirmed</span></td><td class="m">connectionStrings["AppDb"]</td></tr>
+        <tr><td>4</td><td>dependency</td><td class="m">contoso-kv</td><td>Key Vault</td><td>secret reference</td><td><span class="conf inferred">inferred</span></td><td class="m">appSettings["KV_SECRET"]</td></tr>
+        <tr><td>5</td><td>dns</td><td class="m">privatelink.database.windows.net</td><td>Private DNS zone</td><td>linked to contoso-vnet</td><td class="dash">—</td><td class="dash">—</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer>Secrets masked. Icons: azure-nettrace built-in set (license-safe). To use the official Microsoft Azure icons, see references/output-html.md → Official icon mode.</footer>
+</div>
