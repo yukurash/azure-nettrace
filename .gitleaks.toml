@@ -38,7 +38,10 @@ description = "AAD tenant domain (*.onmicrosoft.com) must not appear in a public
 regex = '''[A-Za-z0-9-]+\.onmicrosoft\.com'''
 
   [rules.allowlist]
-  regexes = ['''contoso\.onmicrosoft\.com''']
+  regexes = [
+    '''contoso\.onmicrosoft\.com''',
+    '''NamePrefix\.onmicrosoft\.com''',   # literal placeholder emitted by scripts/sanitize.ps1
+  ]
 
 # --- Path allowlist ---------------------------------------------------------
 
