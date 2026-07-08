@@ -63,6 +63,8 @@ adapter file from `references/adapters/`:
 | `microsoft.servicebus/namespaces`, `microsoft.eventhub/namespaces`, `microsoft.relay/namespaces` | `messaging.md` |
 | `microsoft.containerregistry/registries` | `acr.md` |
 | `microsoft.search/searchservices` | `ai-search.md` |
+| `microsoft.network/applicationgateways` | `app-gateway.md` |
+| `microsoft.cdn/profiles` | `front-door.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
