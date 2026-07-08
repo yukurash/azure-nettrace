@@ -61,6 +61,8 @@ adapter file from `references/adapters/`:
 | `microsoft.app/containerapps`, `microsoft.app/managedenvironments` | `container-apps.md` |
 | `microsoft.cache/redis`, `microsoft.cache/redisenterprise` | `redis.md` |
 | `microsoft.servicebus/namespaces`, `microsoft.eventhub/namespaces`, `microsoft.relay/namespaces` | `messaging.md` |
+| `microsoft.containerregistry/registries` | `acr.md` |
+| `microsoft.search/searchservices` | `ai-search.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
