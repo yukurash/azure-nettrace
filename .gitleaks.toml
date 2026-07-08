@@ -1,0 +1,51 @@
+# gitleaks configuration for azure-nettrace
+# Policy: this is a PUBLIC repo. No real subscription IDs, tenant IDs,
+# resource names, e-mail addresses or secrets may ever be committed.
+# All examples must use zero/placeholder GUIDs and contoso-* names.
+
+[extend]
+useDefault = true
+
+# --- Custom rules -----------------------------------------------------------
+
+[[rules]]
+id = "azure-guid"
+description = "Azure subscription/tenant/object GUID (use zeroed placeholder GUIDs in examples)"
+regex = '''[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'''
+
+  [rules.allowlist]
+  regexes = [
+    # zeroed / repeated-digit placeholder GUIDs are allowed in docs/examples
+    '''00000000-0000-0000-0000-000000000000''',
+    '''11111111-1111-1111-1111-111111111111''',
+    '''22222222-2222-2222-2222-222222222222''',
+  ]
+
+[[rules]]
+id = "azure-connection-secret"
+description = "Connection-string style secret (AccountKey/SharedAccessKey/Password)"
+regex = '''(?i)(AccountKey|SharedAccessKey|SharedAccessSignature|Password|Pwd)\s*=\s*[^;\s*"']{8,}'''
+
+  [rules.allowlist]
+  regexes = [
+    '''(?i)(AccountKey|SharedAccessKey|SharedAccessSignature|Password|Pwd)\s*=\s*\*{3,}''',   # ***MASKED***
+    '''(?i)(Password|Pwd)\s*=\s*\{\{?[A-Za-z_-]+\}?\}''',                                     # {{placeholder}}
+  ]
+
+[[rules]]
+id = "aad-tenant-domain"
+description = "AAD tenant domain (*.onmicrosoft.com) must not appear in a public repo"
+regex = '''[A-Za-z0-9-]+\.onmicrosoft\.com'''
+
+  [rules.allowlist]
+  regexes = ['''contoso\.onmicrosoft\.com''']
+
+# --- Path allowlist ---------------------------------------------------------
+
+[allowlist]
+description = "Local-only paths are gitignored anyway; belt and braces"
+paths = [
+  '''out/''',
+  '''notes/''',
+  '''\.local/''',
+]
