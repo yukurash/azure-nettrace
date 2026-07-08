@@ -36,7 +36,40 @@ walk, connection-target inference, and reachability diagnostics fused into one o
 
 ## Install
 
-_Coming soon — see `skills/azure-nettrace/`._
+Link the skill into your Claude Code skills directory:
+
+```powershell
+# Windows
+New-Item -ItemType Junction -Path "$HOME\.claude\skills\azure-nettrace" `
+  -Target "<repo>\skills\azure-nettrace"
+```
+
+```bash
+# macOS / Linux
+ln -s "<repo>/skills/azure-nettrace" "$HOME/.claude/skills/azure-nettrace"
+```
+
+Then add the Azure MCP server and sign in with the Azure CLI:
+
+```bash
+az login
+az extension add --name resource-graph
+claude mcp add azure -- npx -y @azure/mcp@latest server start --read-only
+```
+
+Now ask Claude Code:
+
+> **trace the network connectivity of `<your-app-service-name>`**
+
+## Examples
+
+See [`examples/`](examples/) for sanitized sample output:
+
+- [healthy trace](examples/appservice-to-sql-healthy.md) — 0 blockers
+- [broken private DNS](examples/appservice-to-sql-broken-dns.md) — 🔴 RF-04 (the classic
+  "private endpoint is set up but it still can't connect" case)
+
+Reproduce them yourself with the [test environment](test-infra/).
 
 ## Security
 
