@@ -22,12 +22,11 @@ param location string = resourceGroup().location
 @description('Short unique suffix to avoid global-name collisions.')
 param suffix string = uniqueString(resourceGroup().id)
 
-@description('SQL admin login (test only).')
-param sqlAdminLogin string = 'nettraceadmin'
+@description('Entra ID admin login (UPN/display name) for the SQL server. Pass at deploy time.')
+param sqlAdAdminLogin string
 
-@description('SQL admin password (test only). Pass at deploy time; never hardcode.')
-@secure()
-param sqlAdminPassword string
+@description('Entra ID admin object ID for the SQL server. Pass at deploy time; never commit.')
+param sqlAdAdminObjectId string
 
 var vnetName = 'vnet-nettrace-${suffix}'
 var appSubnetName = 'snet-appsvc'
@@ -166,8 +165,15 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: sqlServerName
   location: location
   properties: {
-    administratorLogin: sqlAdminLogin
-    administratorLoginPassword: sqlAdminPassword
+    // Entra-ID-only auth (required by MCAPS governance policy — no SQL logins)
+    administrators: {
+      administratorType: 'ActiveDirectory'
+      azureADOnlyAuthentication: true
+      login: sqlAdAdminLogin
+      sid: sqlAdAdminObjectId
+      tenantId: subscription().tenantId
+      principalType: 'User'
+    }
     publicNetworkAccess: 'Disabled' // private-only; reachability depends on PE + DNS
     minimalTlsVersion: '1.2'
   }
