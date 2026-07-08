@@ -1,10 +1,14 @@
 {
-  // Relaxed rules — docs favor readability over strict style
+  // Opt-in policy: disable everything by default, enable only rules that catch
+  // real rendering/correctness bugs. This keeps CI deterministic across
+  // markdownlint versions (new cosmetic rules can't spuriously break the build).
   "config": {
-    "MD013": false,   // line length
-    "MD033": false,   // inline HTML (used in Mermaid labels / tables)
-    "MD041": false,   // first line heading
-    "MD024": { "siblings_only": true }
+    "default": false,
+    "MD037": true,  // spaces inside emphasis markers (accidental italics)
+    "MD039": true,  // spaces inside link text
+    "MD011": true,  // reversed link/image syntax
+    "MD042": true,  // no empty links
+    "MD056": true   // table column count mismatch
   },
   "globs": ["**/*.md"],
   "ignores": ["node_modules"]

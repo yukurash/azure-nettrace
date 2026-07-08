@@ -27,7 +27,7 @@ These are hard requirements. Violating any of them means the output must not be 
 | 1 | `connectionStrings` | **confirmed** | Parse `Server=`, `Data Source=`, `Host=`, `AccountEndpoint=`, `Endpoint=sb://` → FQDN |
 | 2 | `appSettings` values | **confirmed** (full FQDN) / **inferred** (partial) | Match FQDN suffix table below |
 | 3 | Key Vault references | **inferred** | `@Microsoft.KeyVault(SecretUri=https://{vault}.vault.azure.net/...)` → add the **vault itself** as a dependency node; the secret's target stays unknown unless the user opts in |
-| 4 | Managed identity role assignments (Q11) | **inferred** | Data-plane roles (Storage Blob Data *, Key Vault Secrets User, Cosmos DB Built-in Data *, Service Bus Data *, Search Index Data *) → the role's scope is a likely target |
+| 4 | Managed identity role assignments (Q11) | **inferred** | Data-plane roles (`Storage Blob Data *`, `Key Vault Secrets User`, `Cosmos DB Built-in Data *`, `Service Bus Data *`, `Search Index Data *`) → the role's scope is a likely target |
 | 5 | Outbound PEs in the source VNet | **corroborating** | PEs in the same VNet whose targets match an inferred FQDN strengthen (not create) an edge |
 
 ## FQDN suffix → resource type map

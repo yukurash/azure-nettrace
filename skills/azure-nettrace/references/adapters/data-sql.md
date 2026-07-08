@@ -24,7 +24,7 @@ A database resource (`servers/databases`) inherits server networking — trace t
 |---|---|
 | Network mode | `properties.network.publicNetworkAccess`; **VNet-injected** if `properties.network.delegatedSubnetResourceId != null` (no PE in that mode — the server itself lives in the subnet) |
 | Private DNS (VNet-injected) | `properties.network.privateDnsZoneArmResourceId` → run Q9 on that zone |
-| IP firewall (public mode) | `az postgres|mysql flexible-server firewall-rule list` |
+| IP firewall (public mode) | `az postgres flexible-server firewall-rule list` (or `az mysql flexible-server ...`) |
 | Private endpoints (public-with-PE mode) | Q4; zones `privatelink.postgres.database.azure.com` / `privatelink.mysql.database.azure.com`; ports 5432 / 3306 |
 
 VNet-injected note: source and server must share the VNet or a peering path (E5),
