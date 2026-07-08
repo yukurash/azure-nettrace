@@ -45,7 +45,15 @@ These are hard requirements. Violating any of them means the output must not be 
 | `.azurewebsites.net` | another App Service / Function App |
 | `.search.windows.net` | AI Search |
 | `.openai.azure.com` / `.cognitiveservices.azure.com` | Azure OpenAI / AI Services |
+| `.services.ai.azure.com` | Azure AI Services (unified) |
 | `.azurecr.io` | Container Registry |
+| `.eventgrid.azure.net` | Event Grid |
+| `.azconfig.io` | App Configuration |
+| `.service.signalr.net` | Azure SignalR |
+| `.webpubsub.azure.com` | Azure Web PubSub |
+| `.azuresynapse.net` | Synapse (SQL/dev endpoints) |
+| `.datafactory.azure.net` | Data Factory |
+| `.azurestaticapps.net` | Static Web Apps |
 
 Resolve FQDN first label → resource via ARG:
 ```kusto
