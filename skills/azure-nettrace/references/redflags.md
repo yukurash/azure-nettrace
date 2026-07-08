@@ -23,12 +23,18 @@ target (specific prefix, `*`, `Internet`, or the matching service tag), **and** 
 from the source's address space, with no lower-priority Allow.
 **Note:** if network policies are `Disabled`, NSG rules do not apply to the PE → ✅.
 
-## RF-03 🟡 — Default route points to an NVA
+## RF-03 🟡→🔴/✅ — Default route points to an NVA
 **Where:** route table on the source's egress subnet.
 **Condition:** a route with `addressPrefix == '0.0.0.0/0'` and
 `nextHopType == 'VirtualAppliance'`.
-**Report:** "egress traverses NVA at {nextHopIp}; the NVA/firewall policy cannot be
-verified from ARM — confirm it allows {target}:{port}."
+**Upgrade path:** if `{nextHopIp}` matches an **Azure Firewall** private IP, load
+`adapters/azure-firewall.md` and evaluate its rule collections against the traced
+`source → {target}:{port}` flow. This turns the finding into a real verdict:
+🔴 if no rule allows it (name the missing/blocking collection), ✅ if a network or
+application rule allows it. Only fall back to 🟡 when the NVA is a third-party
+appliance whose policy is not in ARM.
+**Report (unresolved case):** "egress traverses NVA at {nextHopIp}; policy not in ARM —
+confirm it allows {target}:{port}."
 
 ## RF-04 🔴 — Private DNS zone lacks a link to the source VNet
 **Where:** the `privatelink.*` zone matching the target service (zone map in `walker.md`).
