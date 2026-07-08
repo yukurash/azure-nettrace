@@ -20,9 +20,18 @@ inline/terminal output.
 
 1. Copy the entire `<style>` block **and** the `<svg id="nt-sprite">` sprite from
    `assets/report-template.html` **verbatim** into the output.
-2. Set `<title>` and build the `<body>` with the same structure as the template
-   (`.wrap` → header + `.notice` → `.summary` → Path `section` → Red flags `section`
-   → Dependencies `section` → `footer`), filling from the trace facts.
+2. Set `<title>` and build the `<body>` in this order (same structure as the template):
+   1. **header** — `.kicker`, `<h1>` = resource name (monospace), `.sub` (type chip +
+      "…network reachability"), `.meta` (subscription truncated · date · read-only).
+   2. **`.verdict`** — the answer first. One plain-language sentence stating whether the
+      resource can reach its target and, if not, the single root cause. Class = worst
+      severity (`verdict crit` / `warn` / `pass`); glyph 🔴/🟡/🟢; a `.counts` line.
+   3. **Path** (`<h2>` + `.diagram > .path`) — the schematic (see below).
+   4. **Red flags** (`<h2>` + `.flags`) — one `.flag` block per 🔴/🟡 (fcode + title +
+      `<dl>` of 根拠/影響/修正 with the fix in `<pre>`), then a `.passline` for ✅, then
+      an unverified list for ⚪.
+   5. **Dependencies** (`<h2>` + `.tbl > table`) — hop rows with confidence & evidence.
+   6. **footer** — masking notice + icon attribution.
 3. Write the file to `out/trace-<resource>-<lang>.html` (the `out/` dir is gitignored —
    never commit real trace output). Tell the user the path and that opening it in a
    browser renders the diagram.
@@ -30,10 +39,39 @@ inline/terminal output.
 The file is plain HTML — it renders by double-clicking. Do not add external `<script>`
 or `<link>`; keep it self-contained.
 
+## Path schematic
+
+The path is a horizontal wired diagram, **not** boxed cards. Each hop is a `.node`
+(icon + name + type); hops are joined by `.link` connectors that carry a label:
+
+```html
+<div class="path">
+  <div class="node">
+    <span class="ic" style="--catcolor:var(--cat-web)"><svg><use href="#nt-appservice"/></svg></span>
+    <span class="nm">contoso-app</span><span class="ty">App Service</span>
+    <!-- optional side dependency hanging below this node: -->
+    <div class="branch" style="--bcat:var(--cat-sec)"><span class="drop"></span>
+      <span class="bic"><svg><use href="#nt-keyvault"/></svg></span>
+      <span class="bn">contoso-kv</span><span class="bnote">KV ref</span></div>
+  </div>
+  <div class="link"><div class="line"></div><span class="lab">VNet integration</span></div>
+  <!-- … more nodes/links … -->
+  <div class="node">… <span class="mk crit">unreachable</span></div>
+</div>
+```
+
+- **Main line** = the source → target chain. Put branch/side resources (Key Vault,
+  DNS zone, NSG) as a `.branch` **under** the node they belong to (a drop connector +
+  small icon + note), so the layout stays aligned without cross-column math.
+- A **broken hop** uses `<div class="link broken">` (adds a red dashed line, arrowhead
+  and a `✕`); its `.lab` states why (e.g. "DNS unresolved → public IP").
+- Mark an unreachable/at-risk node with `<span class="mk crit">…</span>` (or `mk ok`).
+
 ## Node icons — type → sprite key
 
 Set the node's category color with `style="--catcolor:var(--cat-…)"` and reference the
-symbol with `<use href="#nt-…"/>`.
+symbol with `<use href="#nt-…"/>`. (In official-icon mode, replace the `<use>` with the
+inlined official SVG — see below.)
 
 | Resource | sprite key `#nt-…` | `--cat-…` |
 |---|---|---|
@@ -64,16 +102,15 @@ symbol with `<use href="#nt-…"/>`.
 
 ## Severity → classes
 
-| Verdict | node | badge | flag card | summary chip |
+| Verdict | verdict band | node mark | broken hop | red-flag block |
 |---|---|---|---|---|
-| blocker 🔴 | `node crit` | `badge crit` | `flag crit` | `chip crit` |
-| warning 🟡 | `node warn` | `badge` (amber via `.warn` on flag) | `flag warn` | `chip warn` |
-| pass ✅ | — | `badge ok` | one `passline` summarizing all passes | `chip pass` |
-| unverified ⚪ | — | — | list under the red-flag panel | `chip unv` |
+| blocker 🔴 | `verdict crit` (glyph 🔴) | `mk crit` | `link broken` on the failing hop | `flag` (red `fcode`) |
+| warning 🟡 | `verdict warn` (glyph 🟡) | `mk warn` | — | `flag warn` |
+| pass ✅ | `verdict pass` (glyph 🟢) | `mk ok` | — | one `passline` summarizing passes |
+| unverified ⚪ | — | — | — | a short list under the flags |
 
-A dashed red connector (`conn dashed`) marks a broken edge in the path (e.g. DNS
-resolving to a public IP). Cross-links (KV reference, inferred target) render as
-`attach` chips on the source node.
+The overall `.verdict` band takes the **worst** severity present. A `.branch` that is
+the root cause (e.g. an unlinked DNS zone) gets `branch crit`.
 
 ## Label dictionary
 
@@ -117,9 +154,13 @@ Use the column for `lang`. Left = key.
 | confConfirmed | confirmed | 確認済 |
 | confInferred | inferred | 推定 |
 | confCorroborating | corroborating | 傍証 |
-| reachable | reachable | 到達可 |
+| reachable | Reachable | 到達可 |
 | unreachable | unreachable | 到達不可 |
-| footer | Secrets masked. Icons: azure-nettrace built-in set. | シークレットはマスク済み。アイコンは azure-nettrace 内蔵セット。 |
+| verdictReach | Reachable | 到達可 |
+| verdictBlocked | unreachable | 到達不可 |
+| kvref | KV ref | KV参照 |
+| footerBuiltin | Secrets masked. Icons: azure-nettrace built-in set. | シークレットはマスク済み。アイコンは azure-nettrace 内蔵セット。 |
+| footerOfficial | Secrets masked. Icons: Microsoft Azure official architecture icons. | シークレットはマスク済み。アイコン: Microsoft Azure 公式アーキテクチャアイコン。 |
 
 Red-flag titles/effects/fixes: write them in `lang`. Keep the `RF-NN` code and any
 `az …` command verbatim (commands are language-neutral).
@@ -132,13 +173,21 @@ not committed here — but you may embed them **into a generated diagram** (the 
 use). To enable:
 
 1. One-time: download the official set from
-   <https://learn.microsoft.com/azure/architecture/icons/> and unzip it to
-   `assets/azure-icons/` (this path is gitignored — do not commit it).
-2. `assets/azure-icon-manifest.json` maps each resource `type` → the official SVG's
-   relative path. For each node, read the mapped SVG and **inline it** in place of the
-   `<use href="#nt-…"/>` (strip its width/height; let CSS size it).
-3. If a mapping or file is missing, fall back to the built-in `#nt-…` symbol for that
-   node and note it once in the footer.
+   <https://learn.microsoft.com/azure/architecture/icons/> ("Download SVG icons" →
+   `Azure_Public_Service_Icons_V*.zip`) and unzip it under `assets/azure-icons/` (this
+   path is gitignored — never commit it). The manifest's `_officialRoot`
+   (`assets/azure-icons/Azure_Public_Service_Icons/Icons/`) is where the SVGs live.
+2. `assets/azure-icon-manifest.json` maps each resource `type` → `{builtin, official}`,
+   where `official` is the SVG path relative to `_officialRoot`. For each node, read the
+   mapped SVG and **inline it** in place of `<svg><use href="#nt-…"/></svg>`: keep its
+   `viewBox`, strip the root `width`/`height` so CSS sizes it. The official icons carry
+   their own brand colors — do **not** apply `--catcolor` to them.
+3. If a mapping/file is missing, fall back to the built-in `#nt-…` symbol for that node.
+4. Set the footer to `footerOfficial`.
+
+Terms: Microsoft permits these icons in architecture diagrams/documentation — embedding
+them in a generated report is fine; redistributing the set as files is not (hence the
+gitignore).
 
 Never commit `assets/azure-icons/` or any official SVG. The built-in set stays the
 default so the skill works out of the box.
