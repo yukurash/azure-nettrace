@@ -67,6 +67,7 @@ adapter file from `references/adapters/`:
 | `microsoft.cdn/profiles` | `front-door.md` |
 | `microsoft.network/azurefirewalls` | `azure-firewall.md` |
 | `microsoft.datafactory/factories`, `microsoft.synapse/workspaces` | `data-platform.md` |
+| `microsoft.eventgrid/*`, `microsoft.appconfiguration/configurationstores`, `microsoft.signalrservice/*`, `microsoft.network/loadbalancers`, `microsoft.network/virtualnetworkgateways`, `microsoft.web/staticsites` | `misc-targets.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
