@@ -59,6 +59,8 @@ adapter file from `references/adapters/`:
 | `microsoft.apimanagement/service` | `apim.md` |
 | `microsoft.cognitiveservices/accounts`, `microsoft.machinelearningservices/workspaces` | `foundry.md` |
 | `microsoft.app/containerapps`, `microsoft.app/managedenvironments` | `container-apps.md` |
+| `microsoft.cache/redis`, `microsoft.cache/redisenterprise` | `redis.md` |
+| `microsoft.servicebus/namespaces`, `microsoft.eventhub/namespaces`, `microsoft.relay/namespaces` | `messaging.md` |
 | anything else | `_fallback.md` |
 
 The adapter tells you: where the resource's outbound subnet reference lives, where its
