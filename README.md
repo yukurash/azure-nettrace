@@ -4,10 +4,14 @@
 
 > **Status: work in progress** 🚧
 
-A [Claude Code](https://claude.com/claude-code) **Agent Skill** that traces the network
-connectivity of a **single Azure resource** and renders it as an **interactive HTML
-report** — a wired path diagram with official Azure icons, a red-flag list of
+A **Claude Code Agent Skill** *and* **GitHub Copilot custom agent** that traces the
+network connectivity of a **single Azure resource** and renders it as an **interactive
+HTML report** — a wired path diagram with official Azure icons, a red-flag list of
 reachability blockers, and **click-to-inspect** panels for every resource.
+
+Works in [Claude Code](https://claude.com/claude-code) and [GitHub
+Copilot](https://github.com/features/copilot) from one shared diagnostic knowledge base
+— only the entry point differs (see [Install](#install)).
 
 Give it one resource name (an App Service, VM, AKS cluster, Function App, SQL server,
 Storage account, APIM instance, …) and it walks:
@@ -40,14 +44,27 @@ walk, connection-target inference, and reachability diagnostics fused into one r
 
 ## Requirements
 
-- Claude Code with the [Azure MCP server](https://github.com/Azure/azure-mcp) (recommended)
-  or plain Azure CLI as a fallback
+- **Claude Code** *or* **GitHub Copilot** (VS Code, agent mode)
 - Azure CLI ≥ 2.60 signed in (`az login`), `resource-graph` extension
+- The [Azure MCP server](https://github.com/Azure/azure-mcp) (recommended; the tool falls
+  back to the plain Azure CLI if it is not configured)
 - Reader access to the target subscription
 
 ## Install
 
-Link the skill into your Claude Code skills directory:
+The diagnostic logic lives once under `skills/azure-nettrace/` and is shared by both
+platforms; pick the entry point for your tool.
+
+Common Azure setup (both platforms):
+
+```bash
+az login
+az extension add --name resource-graph
+```
+
+### Claude Code
+
+Link the skill into your Claude Code skills directory and register the Azure MCP server:
 
 ```powershell
 # Windows
@@ -58,13 +75,7 @@ New-Item -ItemType Junction -Path "$HOME\.claude\skills\azure-nettrace" `
 ```bash
 # macOS / Linux
 ln -s "<repo>/skills/azure-nettrace" "$HOME/.claude/skills/azure-nettrace"
-```
 
-Add the Azure MCP server and sign in with the Azure CLI:
-
-```bash
-az login
-az extension add --name resource-graph
 claude mcp add azure -- npx -y @azure/mcp@latest server start --read-only
 ```
 
@@ -72,9 +83,25 @@ Then ask Claude Code:
 
 > **trace the network connectivity of `<your-app-service-name>`**
 
+### GitHub Copilot
+
+Open the repository in VS Code. The custom agent, prompt and MCP server ship with the
+repo — no linking needed:
+
+- `.github/agents/azure-nettrace.agent.md` — the **custom agent** (select it in the Chat
+  view's mode picker; older VS Code builds read it as `.chatmode.md`).
+- `.github/prompts/azure-nettrace.prompt.md` — a `/azure-nettrace` **prompt** for a
+  one-shot run.
+- `.vscode/mcp.json` — registers the read-only Azure MCP server; start it from the MCP
+  view (or let agent mode start it).
+
+Then, in Copilot Chat (agent mode), run the prompt or ask:
+
+> **/azure-nettrace** — or — **trace the network connectivity of `<your-app-service-name>`**
+
 ## Output
 
-By default the skill writes a **self-contained interactive HTML report** to `out/`.
+By default the tool writes a **self-contained interactive HTML report** to `out/`.
 Open it in a browser (light/dark aware, no internet needed):
 
 - a **verdict** band, a **wired path diagram**, a **red-flag** panel and a **dependency table**;

@@ -5,9 +5,13 @@
 > **ステータス: 開発中** 🚧
 
 **単一の Azure リソース**のネットワーク到達性をたどり、**インタラクティブな HTML
-レポート**として描く [Claude Code](https://claude.com/claude-code) の **Agent Skill**
-です。公式 Azure アイコンを使った配線図、到達性のブロッカー（赤信号）一覧、そして
-各リソースを**クリックすると設定が見られる**インスペクタを備えます。
+レポート**として描く、**Claude Code の Agent Skill** 兼 **GitHub Copilot のカスタム
+エージェント**です。公式 Azure アイコンを使った配線図、到達性のブロッカー（赤信号）
+一覧、そして各リソースを**クリックすると設定が見られる**インスペクタを備えます。
+
+[Claude Code](https://claude.com/claude-code) と [GitHub
+Copilot](https://github.com/features/copilot) の両方で動作します。診断ロジックは 1 つの
+ナレッジベースを共有し、**入口だけが異なります**（[インストール](#インストール)参照）。
 
 リソース名を 1 つ渡すと（App Service / VM / AKS / Function App / SQL Server /
 ストレージ / API Management …）、次のように経路をたどります:
@@ -44,14 +48,27 @@ Network Watcher トポロジ）は*リソースグループやネットワーク
 
 ## 必要なもの
 
-- Claude Code ＋ [Azure MCP サーバー](https://github.com/Azure/azure-mcp)（推奨）。
-  なければ Azure CLI に自動フォールバック
+- **Claude Code** または **GitHub Copilot**（VS Code・エージェントモード）
 - Azure CLI 2.60 以上でサインイン済み（`az login`）、`resource-graph` 拡張
+- [Azure MCP サーバー](https://github.com/Azure/azure-mcp)（推奨。未設定なら Azure CLI に
+  自動フォールバック）
 - 対象サブスクリプションの Reader 権限
 
 ## インストール
 
-スキルを Claude Code のスキルディレクトリにリンクします:
+診断ロジックは `skills/azure-nettrace/` に 1 つだけ置かれ、両プラットフォームで共有され
+ます。お使いのツールに合わせて入口を選んでください。
+
+共通の Azure 準備（両プラットフォーム）:
+
+```bash
+az login
+az extension add --name resource-graph
+```
+
+### Claude Code
+
+スキルを Claude Code のスキルディレクトリにリンクし、Azure MCP サーバーを登録します:
 
 ```powershell
 # Windows
@@ -62,13 +79,7 @@ New-Item -ItemType Junction -Path "$HOME\.claude\skills\azure-nettrace" `
 ```bash
 # macOS / Linux
 ln -s "<repo>/skills/azure-nettrace" "$HOME/.claude/skills/azure-nettrace"
-```
 
-Azure MCP サーバーを追加し、Azure CLI でサインインします:
-
-```bash
-az login
-az extension add --name resource-graph
 claude mcp add azure -- npx -y @azure/mcp@latest server start --read-only
 ```
 
@@ -76,9 +87,25 @@ claude mcp add azure -- npx -y @azure/mcp@latest server start --read-only
 
 > **`<あなたのApp Service名>` のネットワーク到達性をトレースして**
 
+### GitHub Copilot
+
+リポジトリを VS Code で開きます。カスタムエージェント・プロンプト・MCP サーバーはリポ
+ジトリに同梱されているので、リンク作業は不要です:
+
+- `.github/agents/azure-nettrace.agent.md` — **カスタムエージェント**（Chat ビューのモード
+  選択から選ぶ。古い VS Code では `.chatmode.md` として認識されます）。
+- `.github/prompts/azure-nettrace.prompt.md` — 一発実行用の `/azure-nettrace` **プロンプト**。
+- `.vscode/mcp.json` — 読み取り専用の Azure MCP サーバーを登録（MCP ビューから起動、または
+  エージェントモードに起動させる）。
+
+Copilot Chat（エージェントモード）で、プロンプトを実行するかこう頼みます:
+
+> **/azure-nettrace** — または — **`<あなたのApp Service名>` のネットワーク到達性をトレースして**
+
 ## 出力
 
-既定では **自己完結のインタラクティブ HTML レポート**を `out/` に書き出します。
+既定では **自己完結のインタラクティブ HTML レポート**を `out/` に書き出します（Claude
+Code・Copilot 共通）。
 ブラウザで開いてください（ダーク/ライト対応・ネット不要）:
 
 - **verdict（結論）**バンド、**配線図**、**赤信号**パネル、**依存関係テーブル**。
