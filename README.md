@@ -45,6 +45,9 @@ opens its security-rule table, so you can check a suspected block without leavin
   <img alt="Clicking the NSG node opens an inspector with its security rules" src="docs/images/report-inspect-en-light.png">
 </picture>
 
+▶ Try the interactive report (sanitized `contoso-*` demo, same RF-04 + RF-06 case):
+<https://yukurash.github.io/azure-nettrace/demo/en/> — click any node to open its settings.
+
 ## Why another visualizer?
 
 Existing tools ([azure-resource-visualizer](https://github.com/microsoft/azure-skills),
