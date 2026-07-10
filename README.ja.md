@@ -2,8 +2,6 @@
 
 [English](README.md) · 日本語
 
-> ステータス: 開発中 🚧
-
 単一の Azure リソースのネットワーク到達性をたどり、インタラクティブな HTML レポートと
 して描く、Claude Code の Agent Skill 兼 GitHub Copilot のカスタムエージェントです。公式
 Azure アイコンを使った配線図、到達性のブロッカー（赤信号）一覧、そして各リソースをクリッ
