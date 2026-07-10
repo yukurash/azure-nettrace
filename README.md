@@ -33,16 +33,16 @@ The report opens the answer first — can the resource reach its target, and if 
 root cause — above a left-to-right path diagram with the broken hop drawn in red:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/report-overview-dark.png">
-  <img alt="Reachability report: verdict band, path diagram and blocker count" src="docs/images/report-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/report-overview-en-dark.png">
+  <img alt="Reachability report: verdict band, path diagram and blocker count" src="docs/images/report-overview-en-light.png">
 </picture>
 
 Click any resource in the diagram to inspect its network settings in place — here the NSG
 opens its security-rule table, so you can check a suspected block without leaving the page:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/report-inspect-dark.png">
-  <img alt="Clicking the NSG node opens an inspector with its security rules" src="docs/images/report-inspect-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/report-inspect-en-dark.png">
+  <img alt="Clicking the NSG node opens an inspector with its security rules" src="docs/images/report-inspect-en-light.png">
 </picture>
 
 ## Why another visualizer?
