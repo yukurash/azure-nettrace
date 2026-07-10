@@ -2,8 +2,6 @@
 
 English · [日本語](README.ja.md)
 
-> Status: work in progress 🚧
-
 A Claude Code Agent Skill and GitHub Copilot custom agent that traces the network
 connectivity of a single Azure resource and renders it as an interactive HTML report —
 a wired path diagram with official Azure icons, a list of reachability blockers, and a
